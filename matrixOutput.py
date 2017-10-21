@@ -2,8 +2,10 @@ import os
 import shutil
 import subprocess
 import time
+import sys
 
-fastqDir = "/dfs1/wpoon/kenqn/fastq"
+fastqDir = sys.argv[0]
+outputFile = sys.argv[1]
 
 def main():
 	matrixOutput("counts")
@@ -21,7 +23,7 @@ def matrixOutput(fpkmCount):
 		with open("{0}/{1}/{1}.{2}".format(fastqDir, directory, fpkmCount), 'w') as outfile:
 			outfile.writelines(data)
 		line += "{0}/{1}/{1}.{2} ".format(fastqDir, directory, fpkmCount)
-	with open("fullMatrix/matrix.counts", 'w') as outfile:
+	with open("fullMatrix/{}.counts".format(outputFile), 'w') as outfile:
 		subprocess.call(['paste', '--delimiters=,'] + line.split(), stdout=outfile)
 				
 
