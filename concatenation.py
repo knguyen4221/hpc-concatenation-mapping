@@ -52,7 +52,7 @@ class Concatenation:
         f.close()
         with open("{0}/mappingInput.txt".format(os.getcwd()), 'w') as outfile:
             outfile.write("{0}/{1}".format(os.getcwd(),self._concatenationOutput))
-        #call(['qsub', '-q', 'bio','/dfs1/wpoon/kenqn/concat.sh'])
+        call(['qsub', '-q', 'bio','/dfs1/wpoon/kenqn/concat.sh'])
      
 
 
