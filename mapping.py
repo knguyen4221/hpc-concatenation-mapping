@@ -11,6 +11,7 @@ class Mapping:
             lines = infile.readlines()
         self.fastqDir = lines[0].strip()
 	self._maxReads = lines[1].strip()
+	self._matrixOuput = lines[2].strip()
 
     def substituteRSEM(self):
         '''Edits the rsem script so that the rsem script runs successfully on the sample
@@ -124,25 +125,13 @@ class Mapping:
         subprocess.call(["qsub", "-q", "bio", "matrix.sh"])
 
     def matrixOutput(self, fpkmCount):
-        #line = 'genes'
-        #for directory in os.listdir(self.fastqDir):
-         #   with open("{0}/{1}/{1}.{2}".format(self.fastqDir, directory, fpkmCount), 'r') as infile:
-         #       data = infile.readlines()
-         #   name = directory.split("_", 1)
-         #   print(name)
-         #   try:
-         #       data[0] = name[1] + "\n"
-         #   except IndexError:
-         #       data[0] = name[0] + "\n"
-         #   with open("{0}/{1}/{1}.{2}".format(self.fastqDir, directory, fpkmCount), 'w') as outfile:
-         #       outfile.writelines(data)
-         #   line += " {0}/{1}/{1}.{2}".format(self.fastqDir, directory, fpkmCount)
-        #with open("fullMatrix.sh", 'w') as outfile:
-          #  outfile.write("#! /bin/bash\n")
-          #  outfile.write("#$ -N matrixOUT\n")
-          #  outfile.write("#$ -q bio\n")
-          #  outfile.write("#$ -hold_jid matrixAWK\n")
-         #   outfile.write("paste -d {}".format(line))
-        #subprocess.call(['qsub', '-q', 'bio', 'fullMatrix.sh'])
+	lines = []
+        with open("matrixOutput.sh", 'r') as infile:
+		lines = infile.readlines()
+	with open("matrixOutput.sh", 'w') as outfile:
+		for line in range(len(lines)):
+		    if lines[line].startswith("python"):
+		        lines[line] = "python matrixOutput.sh {0} {1}".format(self.fastqDir, self._matrixOutput)
+		    outfile.write(lines.join(""))
 	subprocess.call(['qsub', '-q', 'bio', 'matrixOutput.sh'])
     
