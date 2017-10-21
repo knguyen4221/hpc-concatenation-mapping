@@ -51,7 +51,8 @@ class Concatenation:
             f.write(command+"\n")
         f.close()
         with open("{0}/mappingInput.txt".format(os.getcwd()), 'w') as outfile:
-            outfile.write("{0}/{1}".format(os.getcwd(),self._concatenationOutput))
+            outfile.write("{0}/{1}\n".format(os.getcwd(),self._concatenationOutput))
+            outfile.write("{0}".format(self._maxReads))
         call(['qsub', '-q', 'bio','/dfs1/wpoon/kenqn/concat.sh'])
      
 
