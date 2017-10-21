@@ -9,7 +9,8 @@ class Mapping:
         self.inputFileName = inputFileName
         with open(inputFileName, 'r') as infile:
             lines = infile.readlines()
-        self.fastqDir = lines[0]
+        self.fastqDir = lines[0].strip()
+	self._maxReads = lines[1].strip()
 
     def substituteRSEM(self):
         '''Edits the rsem script so that the rsem script runs successfully on the sample
@@ -37,9 +38,8 @@ class Mapping:
             infile.close()
             shellString = re.sub(r'samplename_star_hg38', samplename+"_star", shellString)
             readfiles = ''
-            for filen in sorted(os.listdir(self.fastqDir + "/" + samplename)):
-                if filen.endswith(".fastq.gz"):
-                    readfiles += self.fastqDir + "/" + samplename + "/" + filen + " "
+            for read in range(1, self._maxReads+1):
+		readfiles += "{0}/{1}/{1}-READ{2}.fastq.gz".format(self.fastqDir, samplename, i)
             readfiles.strip()
 
             shellString = re.sub(r'\/fastqdirectory\/samplename-Read1\.fastq\.gz \/fastqdirectory\/samplename-Read2\.fastq\.gz', readfiles, shellString)
