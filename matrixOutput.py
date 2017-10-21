@@ -4,13 +4,14 @@ import subprocess
 import time
 import sys
 
-fastqDir = sys.argv[0]
-outputFile = sys.argv[1]
+
 
 def main():
-	matrixOutput("counts")
+	fastqDir = sys.argv[0]
+	outputFile = sys.argv[1]
+	matrixOutput("counts", fastqDir, outputFile)
 
-def matrixOutput(fpkmCount):
+def matrixOutput(fpkmCount, fastqDir, outputFile):
 	line = 'genes '
 	for directory in os.listdir(fastqDir):
 		with open("{0}/{1}/{1}.{2}".format(fastqDir, directory, fpkmCount), 'r') as infile:
