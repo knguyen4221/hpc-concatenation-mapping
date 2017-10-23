@@ -39,8 +39,8 @@ class Mapping:
             infile.close()
             shellString = re.sub(r'samplename_star_hg38', samplename+"_star", shellString)
             readfiles = ''
-            for read in range(1, self._maxReads+1):
-		readfiles += "{0}/{1}/{1}-READ{2}.fastq.gz".format(self.fastqDir, samplename, i)
+            for read in range(1, int(self._maxReads)+1):
+		readfiles += "{0}/{1}/{1}-READ{2}.fastq.gz".format(self.fastqDir, samplename, read)
             readfiles.strip()
 
             shellString = re.sub(r'\/fastqdirectory\/samplename-Read1\.fastq\.gz \/fastqdirectory\/samplename-Read2\.fastq\.gz', readfiles, shellString)
