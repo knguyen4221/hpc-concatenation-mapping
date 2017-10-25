@@ -15,6 +15,7 @@ class Concatenation:
             self._toBeConcatenated = infile.readline().strip()
             self._concatenationOutput = infile.readline().strip()
             self._sampleNameFile = infile.readline().strip()
+            self._matrixOutput = infile.readline().strip()
         self._matched_barcodes, self._maxReads = self._make_dict()
         self._sampleNameDict = readInSampleNames(self._sampleNameFile)
 
@@ -53,6 +54,7 @@ class Concatenation:
         with open("{0}/mappingInput.txt".format(os.getcwd()), 'w') as outfile:
             outfile.write("{0}/{1}\n".format(os.getcwd(),self._concatenationOutput))
             outfile.write("{0}".format(self._maxReads))
+            outfile.write("{0}".format(self._matrixOutput))
         call(['qsub', '-q', 'bio','/dfs1/wpoon/kenqn/concat.sh'])
      
 
