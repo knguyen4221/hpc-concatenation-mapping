@@ -7,8 +7,8 @@ import sys
 
 
 def main():
-	fastqDir = sys.argv[0]
-	outputFile = sys.argv[1]
+	fastqDir = sys.argv[1]
+	outputFile = sys.argv[2]
 	matrixOutput("counts", fastqDir, outputFile)
 
 def matrixOutput(fpkmCount, fastqDir, outputFile):
@@ -24,7 +24,7 @@ def matrixOutput(fpkmCount, fastqDir, outputFile):
 		with open("{0}/{1}/{1}.{2}".format(fastqDir, directory, fpkmCount), 'w') as outfile:
 			outfile.writelines(data)
 		line += "{0}/{1}/{1}.{2} ".format(fastqDir, directory, fpkmCount)
-	with open("fullMatrix/{}.counts".format(outputFile), 'w') as outfile:
+	with open("fullMatrix/{0}.counts".format(outputFile), 'w') as outfile:
 		subprocess.call(['paste', '--delimiters=,'] + line.split(), stdout=outfile)
 				
 
