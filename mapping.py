@@ -131,7 +131,7 @@ class Mapping:
 	with open("matrixOutput.sh", 'w') as outfile:
 		for line in range(len(lines)):
 		    if lines[line].startswith("python"):
-		        lines[line] = "python matrixOutput.sh {0} {1}".format(self.fastqDir, self._matrixOutput)
+		        lines[line] = "python matrixOutput.py {0} {1}".format(self.fastqDir, self._matrixOutput)
 		outfile.write("".join(lines))
 	subprocess.call(['qsub', '-q', 'bio', 'matrixOutput.sh'])
     
