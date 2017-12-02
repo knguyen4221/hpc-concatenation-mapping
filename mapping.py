@@ -109,7 +109,7 @@ class Mapping:
         self.matrixOutput("counts")
 
 
-    def run_awk_scriptsV2(self, fpkmCount):
+    def run_awk_scriptsV2(self):
         with open("matrix.sh", 'w') as outfile:
             outfile.write("#! /bin/bash\n")
             outfile.write("#$ -N matrixAWK\n")
@@ -118,9 +118,9 @@ class Mapping:
             lines = ""
             for directory in os.listdir(self.fastqDir.strip()):
                 hold.append(directory+"_rsem")
-                lines += "awk -v OFS=\\t '{{print $5}}' {0}/{1}/{1}_rsem.rsem.genes.results > {0}/{1}/{1}.{2}\n".format(self.fastqDir.strip(), directory, fpkmCount)
+                lines += "awk -v OFS=\\t '{{print $7}}' {0}/{1}/{1}_rsem.rsem.genes.results > {0}/{1}/{1}.fpkm\n".format(self.fastqDir.strip(), directory)
+                lines += "awk -v OFS=\\t '{{print $5}}' {0}/{1}/{1}_rsem.rsem.genes.results > {0}/{1}/{1}.counts\n".format(self.fastqDir.strip(), directory)
             outfile.write("#$ -hold_jid " + ",".join(hold) + "\n")
-	    print(lines)
             outfile.write(lines)
         subprocess.call(["qsub", "-q", "bio", "matrix.sh"])
 
