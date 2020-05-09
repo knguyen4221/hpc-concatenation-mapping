@@ -7,13 +7,12 @@ from collections import defaultdict
 from subprocess import Popen
 from subprocess import call
 
-
 class Concatenation:
 
     def __init__(self, inputFile):
-        self._regexReadsGroupName = "reads";
-        self._regexLaneGroupName = "lane";
-        self._regexSequenceGroupName = "sequence";
+        self._regexReadsGroupName = "reads"
+        self._regexLaneGroupName = "lane"
+        self._regexSequenceGroupName = "sequence"
 
         #grabbing information from config file
         try:
@@ -24,6 +23,7 @@ class Concatenation:
                 self._sampleNameFile = infile.readline().strip()
                 self._matrixOutput = infile.readline().strip()
                 self._csvToTxtGzRegex = infile.readline().strip()
+
             self._matched_barcodes, self._maxReads = self._make_dict()
             self._sampleNameDict = readInSampleNames(self._sampleNameFile)
         except FileNotFoundError:
@@ -57,12 +57,8 @@ class Concatenation:
         maxReads = 0
         for filename in os.listdir(os.getcwd()+ "/"+ self._toBeConcatenated.strip()):
             obj = re.match(self._csvToTxtGzRegex, filename)
-            obj.group
-            maxReads = int(obj.group(4) if maxReads < int(obj.group(4)) else maxReads)
-            #group 3 = sequence
-            #group 4 = reads
-            #group 1 = lane
-            matched_barcodes[obj.group(3)][obj.group(4)][obj.group(1)[1:]] = filename
+            maxReads = int(obj.group(self._regexReadsGroupName) if maxReads < int(obj.group(self._regexReadsGroupName)) else maxReads)
+            matched_barcodes[obj.group(self._regexSequenceGroupName)][obj.group(self._regexReadsGroupName)][obj.group(self._regexLaneGroupName)[1:]] = filename
         #print(matched_barcodes)
         return (matched_barcodes, maxReads)
 
@@ -72,14 +68,14 @@ class Concatenation:
             for sequence in self._sampleNameDict:
                 for lane in self._sampleNameDict[sequence]:
                     if not os.path.exists(self._concatenationOutput + "/" + sequence+"_"+lane[0]):
-                        call(["mkdir", self._concatenationOutput+"/"+sequence+"_"+lane[0]])
+                        os.mkdir(self._concatenationOutput+"/"+sequence+"_"+lane[0])
                     sampleName = sequence+"_"+lane[0]
                     for read in range(1, self._maxReads+1):
                         final = "cat"
                         for i in lane[1].split(","):
                             #print( sequence,read,i)
                             final += " {0}/{1}/{2}".format(os.getcwd(),self._toBeConcatenated, self._matched_barcodes[sequence][str(read)][str(i)])
-                        final += " > {0}/{1}/{2}/{3}-READ{4}.fastq.gz".format(os.getcwd(),self._concatenationOutput, sampleName, sampleName, str(read))
+                        final += " > {0}/{1}/{2}/{3}-READ{4}.fastq.gz".format(os.getcwd(), self._concatenationOutput, sampleName, sampleName, str(read))
                         cmd.append(final)
             self._addToConcat(cmd)
             self._writeToMappingInput()
