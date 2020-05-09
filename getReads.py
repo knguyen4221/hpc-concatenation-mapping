@@ -1,7 +1,7 @@
 import re
 import os
 
-FASTQDIRECTORY = "/dfs1/wpoon/kenqn/fastq/"
+FASTQDIRECTORY = "/dfs3/wpoon/kenqn/fastq/"
 
 def main():
 	outfile = open("totalMappedReads.csv", 'w')

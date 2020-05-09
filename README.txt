@@ -10,8 +10,14 @@ Use:
 		2nd line = folder full of -Sequences.txt
 		3rd line = where the concatenated files should be outputted
 		4th line = samples names and barcode information
+		5th line = name of matrix to be deposited into fullMatrix folder (if 
+			   concatenating)
 
 	submit the whole job with: qsub -q bio main.sh
 
 concatInput.txt is pre-populated with file names for reference
+
+first true/false is if it is paired end
+second: if seq are zipped
+third did I run concatenation
 		

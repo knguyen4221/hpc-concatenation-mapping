@@ -1,0 +1,6 @@
+/dfs3/wpoon/wpoon/hpc-concatenation-mapping-master/fastqnR057
+2
+nR057_matrix
+true
+true
+true

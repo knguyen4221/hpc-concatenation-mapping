@@ -1,4 +1,6 @@
-R324R328
-R324R328
-fastqR324R328
-324328sampleNames.csv
+nR057
+nR057
+fastqnR057
+nR057_1.csv
+nR057_matrix
+[A-Z0-9]+-(?P<lane>L[0-9]*)-(P[0-9]*-(?P<sequence>[G|C|A|T]{6})-READ(?P<reads>[0-9]))-(Sequences\.txt\.gz)

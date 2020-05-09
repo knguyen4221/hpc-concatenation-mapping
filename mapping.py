@@ -5,13 +5,16 @@ import subprocess
 import time
 
 class Mapping:
-    def __init__(self, inputFileName):
+    def __init__(self, inputFileName, ranConcatenation):
         self.inputFileName = inputFileName
         with open(inputFileName, 'r') as infile:
             lines = infile.readlines()
         self.fastqDir = lines[0].strip()
-	self._maxReads = lines[1].strip()
-	self._matrixOuput = lines[2].strip()
+        self._maxReads = lines[1].strip()
+        self._matrixOutput = lines[2].strip()
+        self._pairedEnd = False if lines[3].strip().lower() == "false" else True
+	self._isGzipped = False if lines[4].strip().lower() == "false" else True
+        self._ran_concatenation = False if lines[5].strip().lower() == "false" else True
 
     def substituteRSEM(self):
         '''Edits the rsem script so that the rsem script runs successfully on the sample
@@ -40,7 +43,10 @@ class Mapping:
             shellString = re.sub(r'samplename_star_hg38', samplename+"_star", shellString)
             readfiles = ''
             for read in range(1, int(self._maxReads)+1):
-		readfiles += " {0}/{1}/{1}-READ{2}.fastq.gz".format(self.fastqDir, samplename, read)
+            	if(self._ran_concatenation):
+                	readfiles += " {0}/{1}/{1}-READ{2}.fastq.gz".format(self.fastqDir, samplename, read)
+                else:
+                	readfiles += " {0}/{1}/{1}_{2}.fastq".format(self.fastqDir, samplename, read)
             readfiles.strip()
 
             shellString = re.sub(r'\/fastqdirectory\/samplename-Read1\.fastq\.gz \/fastqdirectory\/samplename-Read2\.fastq\.gz', readfiles, shellString)
@@ -51,22 +57,32 @@ class Mapping:
 
     def copyShellScripts(self):
         for filename in os.listdir(self.fastqDir):
-            shutil.copy("rsem.sh", self.fastqDir+"/"+filename+"/rsem.sh")
-            shutil.copy("star.hg38.sh", self.fastqDir+"/"+filename+"/star.hg38.sh")
+            if(self._pairedEnd):
+                shutil.copy("rsem.sh", self.fastqDir+"/"+filename+"/rsem.sh")
+            else:
+                shutil.copy("rsem1.sh", self.fastqDir+"/"+filename+"/rsem.sh")
+	    if(self._isGzipped):
+            	shutil.copy("star.hg38.sh", self.fastqDir+"/"+filename+"/star.hg38.sh")
+            else:
+                shutil.copy("unzipped_star.hg38.sh", self.fastqDir+"/"+filename+"/star.hg38.sh")
 
 
 
     def run_rsem_scripts(self):
         '''submits rsem.sh scripts for each sample to the bio hpc queue to be run'''
-        for directory in os.listdir(self.fastqDir):
+	mainDirectory = os.getcwd()
+	for directory in os.listdir(self.fastqDir):
             os.chdir(self.fastqDir+"/"+directory+"/")
             subprocess.call(["qsub", "-q", "bio", self.fastqDir+"/"+directory+"/"+"rsem.sh"])
+	os.chdir(mainDirectory)
 
     def run_star_scripts(self):
         '''submits star.hg38.sh scripts for each sample to the bio hpc queue to be run'''
-        for directory in os.listdir(self.fastqDir):
+        mainDirectory = os.getcwd()
+	for directory in os.listdir(self.fastqDir):
             os.chdir(self.fastqDir+"/"+directory+"/")
             subprocess.call(["qsub", "-q", "bio", self.fastqDir+"/"+directory+"/"+"star.hg38.sh"])
+	os.chdir(mainDirectory)
 
     def run_awk_scripts(self, fpkmCount):
         for directory in os.listdir(self.fastqDir):
@@ -92,7 +108,7 @@ class Mapping:
             #remove when whole thing is finalized
             if directory != 'GTTTCG_iPS6_AST':
                 line += self.fastqDir + "/" + directory + "/" + directory + "." + fpkmCount
-        matrix = open("/fullMatrix" + "/matrix." + fpkmCount, "w")
+        matrix = open("fullMatrix" + "/matrix." + fpkmCount, "w")
         subprocess.call(["paste", '-d,'] + line.split(), stdout=matrix)
         matrixFPKM.close()
 
@@ -105,7 +121,7 @@ class Mapping:
         self.reWriteShellScripts()
         self.run_star_scripts()
         self.run_rsem_scripts()
-        self.run_awk_scriptsV2("counts")
+        self.run_awk_scriptsV2()
         self.matrixOutput("counts")
 
 
@@ -125,13 +141,13 @@ class Mapping:
         subprocess.call(["qsub", "-q", "bio", "matrix.sh"])
 
     def matrixOutput(self, fpkmCount):
-	lines = []
-        with open("matrixOutput.sh", 'r') as infile:
-		lines = infile.readlines()
-	with open("matrixOutput.sh", 'w') as outfile:
-		for line in range(len(lines)):
-		    if lines[line].startswith("python"):
-		        lines[line] = "python matrixOutput.py {0} {1}".format(self.fastqDir, self._matrixOutput)
-		outfile.write("".join(lines))
-	subprocess.call(['qsub', '-q', 'bio', 'matrixOutput.sh'])
+        lines = []
+        with open(os.getcwd()+"/matrixOutput.sh", 'r') as infile:
+            lines = infile.readlines()
+        with open(os.getcwd()+"/matrixOutput.sh", 'w') as outfile:
+            for line in range(len(lines)):
+                if lines[line].startswith("python"):
+                    lines[line] = "python matrixOutput.py {0} {1}".format(self.fastqDir, self._matrixOutput)
+            outfile.write("".join(lines))
+        subprocess.call(['qsub', '-q', 'bio', os.getcwd()+'/matrixOutput.sh'])
     
