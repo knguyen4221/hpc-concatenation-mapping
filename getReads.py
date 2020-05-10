@@ -1,19 +1,19 @@
 import re
 import os
-
-FASTQDIRECTORY = "/dfs3/wpoon/kenqn/fastq/"
+import constants
 
 def main():
 	outfile = open("totalMappedReads.csv", 'w')
 	outfile.write(',Total Reads, Unique Reads\n')
+	fastQDir = constants.Constants.FASTQDIRECTORY
 
 	reads = ""
 	percentreads = ""
 
-	for directory in os.listdir(FASTQDIRECTORY):
+	for directory in os.listdir(fastQDir):
 		#directory != "AGTTCC_iPS14_BMEC"
 		if directory != "matrix.fpkm" and directory != "matrix.counts" and directory != "GTTTCG_iPS6_AST":
-			infile = open(FASTQDIRECTORY+directory+"/star_hg38Log.final.out", 'r')
+			infile = open(fastQDir+directory+"/star_hg38Log.final.out", 'r')
 			for line in infile:
 				temp =  re.match(r"Uniquely mapped reads \% \|(.*)$", line.strip())
 				if temp == None:

@@ -3,6 +3,7 @@ import shutil
 import re
 import subprocess
 import time
+import constants
 
 class Mapping:
     def __init__(self, inputFileName, ranConcatenation):
@@ -13,7 +14,7 @@ class Mapping:
         self._maxReads = lines[1].strip()
         self._matrixOutput = lines[2].strip()
         self._pairedEnd = False if lines[3].strip().lower() == "false" else True
-	self._isGzipped = False if lines[4].strip().lower() == "false" else True
+        self._isGzipped = False if lines[4].strip().lower() == "false" else True
         self._ran_concatenation = False if lines[5].strip().lower() == "false" else True
 
     def substituteRSEM(self):
@@ -70,18 +71,18 @@ class Mapping:
 
     def run_rsem_scripts(self):
         '''submits rsem.sh scripts for each sample to the bio hpc queue to be run'''
-	mainDirectory = os.getcwd()
-	for directory in os.listdir(self.fastqDir):
-            os.chdir(self.fastqDir+"/"+directory+"/")
-            subprocess.call(["qsub", "-q", "bio", self.fastqDir+"/"+directory+"/"+"rsem.sh"])
-	os.chdir(mainDirectory)
+        mainDirectory = os.getcwd()
+        for directory in os.listdir(self.fastqDir):
+                os.chdir(self.fastqDir+"/"+directory+"/")
+                subprocess.call(["qsub", "-q", constants.Constants.CLUSTER, self.fastqDir+"/"+directory+"/"+"rsem.sh"])
+        os.chdir(mainDirectory)
 
     def run_star_scripts(self):
         '''submits star.hg38.sh scripts for each sample to the bio hpc queue to be run'''
         mainDirectory = os.getcwd()
 	for directory in os.listdir(self.fastqDir):
             os.chdir(self.fastqDir+"/"+directory+"/")
-            subprocess.call(["qsub", "-q", "bio", self.fastqDir+"/"+directory+"/"+"star.hg38.sh"])
+            subprocess.call(["qsub", "-q", constants.Constants.CLUSTER, self.fastqDir+"/"+directory+"/"+"star.hg38.sh"])
 	os.chdir(mainDirectory)
 
     def run_awk_scripts(self, fpkmCount):
@@ -110,7 +111,7 @@ class Mapping:
                 line += self.fastqDir + "/" + directory + "/" + directory + "." + fpkmCount
         matrix = open("fullMatrix" + "/matrix." + fpkmCount, "w")
         subprocess.call(["paste", '-d,'] + line.split(), stdout=matrix)
-        matrixFPKM.close()
+        matrix.close()
 
     def reWriteShellScripts(self):
         self.substituteSTAR()
@@ -138,7 +139,7 @@ class Mapping:
                 lines += "awk -v OFS=\\t '{{print $5}}' {0}/{1}/{1}_rsem.rsem.genes.results > {0}/{1}/{1}.counts\n".format(self.fastqDir.strip(), directory)
             outfile.write("#$ -hold_jid " + ",".join(hold) + "\n")
             outfile.write(lines)
-        subprocess.call(["qsub", "-q", "bio", "matrix.sh"])
+        subprocess.call(["qsub", "-q", constants.Constants.CLUSTER, "matrix.sh"])
 
     def matrixOutput(self, fpkmCount):
         lines = []
@@ -149,5 +150,5 @@ class Mapping:
                 if lines[line].startswith("python"):
                     lines[line] = "python matrixOutput.py {0} {1}".format(self.fastqDir, self._matrixOutput)
             outfile.write("".join(lines))
-        subprocess.call(['qsub', '-q', 'bio', os.getcwd()+'/matrixOutput.sh'])
+        subprocess.call(['qsub', '-q', constants.Constants.CLUSTER, os.getcwd()+'/matrixOutput.sh'])
     
