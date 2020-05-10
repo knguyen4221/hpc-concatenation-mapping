@@ -28,8 +28,8 @@ class Concatenation:
 
             self._matched_barcodes, self._maxReads = self._make_dict()
             self._sampleNameDict = readInSampleNames(self._sampleNameFile)
-        except FileNotFoundError:
-            raise FileNotFoundError("Couldn't find {0)".format(inputFile))
+        except IOError:
+            raise Exception("Couldn't find {0)".format(inputFile))
         except EOFError:
             raise EOFError("You're missing lines from {0)".format(inputFile))
 
@@ -60,6 +60,10 @@ class Concatenation:
 
         for filename in os.listdir(os.getcwd() + "/" + self._toBeConcatenated.strip()):
             obj = re.match(self._csvToTxtGzRegex, filename)
+
+            if not obj:
+                raise Exception("{0} regex did not match {1}".format(
+                    self._csvToTxtGzRegex, filename))
 
             maxReads = int(obj.group(self._regexReadsGroupName) if maxReads < int(
                 obj.group(self._regexReadsGroupName)) else maxReads)
@@ -103,15 +107,14 @@ class Concatenation:
             for command in cmd:
                 f.write(command+"\n")
         except OSError as e:
-            raise FileNotFoundError("Could not write to concat.sh", e)
+            raise Exception("Could not write to concat.sh", e)
         finally:
             f.close()
 
     def _writeToMappingInput(self):
         try:
             with open("{0}/mappingInput.txt".format(os.getcwd()), 'w') as outfile:
-                outfile.write("{0}/{1}\n".format(os.getcwd(),
-                                                 self._concatenationOutput))
+                outfile.write("{0}/{1}\n".format(os.getcwd(), self._concatenationOutput))
                 outfile.write("{0}\n".format(self._maxReads))
                 outfile.write("{0}\n".format(self._matrixOutput))
                 outfile.write("true\n")
